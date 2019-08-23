@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<mapper namespace="com.solfood.mapper.memberMapper">
+	
+		<!-- ========================== 로그인=============================== -->
+		<select id="login" resultType="com.solfood.dto.MemberVO">
+			SELECT *
+			FROM account
+			WHERE account_user = #{account_user} AND account_password = #{account_password}
+		</select>
+		
+	
+	<!-- ========================== 회원 가입 =============================== -->
+		<!-- 회원정보 조회 -->	
+		<select id="selectMember" resultType="com.solfood.dto.MemberVO">
+	        SELECT * FROM ACCOUNT
+	    </select>    
+	    
+	    <!-- 아이디 중복 검사 -->
+    	<select id="check_id" parameterType="String" resultType="int">
+			SELECT COUNT(*) 
+			FROM account WHERE account_user = #{account_user}
+		</select>
+	    
+	    <!-- 이메일 중복 검사 -->
+   	    <select id="check_email" parameterType="String" resultType="int">
+			SELECT COUNT(*) 
+			FROM account WHERE account_email = #{account_email}
+		</select>
+	    
+	    
+	    <!-- 회원가입 -->
+	    <insert id="joinMember" parameterType="com.solfood.dto.MemberVO">
+	    	INSERT INTO account (	account_user,
+	    							account_password,
+	    							account_name,
+	    							account_date,
+	    							account_tel,
+	    							account_address,
+	    							account_grade,
+	    							account_age,
+	    							account_gender,
+	    							account_email)
+			VALUES(	#{account_user},
+					#{account_password},
+					#{account_name},
+					now(),
+					#{account_tel},
+					#{account_address},
+					'1',
+					#{account_age},
+					#{account_gender},
+					CONCAT(#{account_email1}, '@', #{account_email2}))
+	    </insert>
+	    
+	    
+	    <!-- 회원정보 수정 -->
+		<update id="updateMemberSub" parameterType="com.solfood.dto.MemberVO">
+			UPDATE account
+			SET account_name = #{account_name},
+				account_grade = #{account_grade},
+				account_password = #{account_password},
+				account_tel = #{account_tel},
+				account_address = #{account_address},
+				account_email = CONCAT(#{account_email1}, '@', #{account_email2})
+				
+			WHERE account_user = #{account_user}
+		</update>
+		
+		<!-- 회원정보 삭제 -->
+		<delete id="deleteMember" parameterType="String">
+			DELETE FROM account
+			WHERE account_user = #{account_user}
+		</delete>
+	
+	</mapper>
+
+	
+	

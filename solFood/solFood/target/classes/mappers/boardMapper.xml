@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.solfood.mappers.boardMapper">
+	<!-- DAO와 연동하기 위한 SQL 작성하기 -->
+	<!-- ============================================================================================================= -->
+
+	<!-- 게시물 작성 -->
+	<insert id="write" parameterType="com.solfood.dto.BoardVO"> <!-- 매핑을 위한 ID -->
+		insert into
+		board(
+		board_date,
+		board_title,
+		board_content,
+		account_user,
+		board_category,
+		board_readcount)
+		values(
+		now(),
+		#{board_title},
+		#{board_content},
+		#{account_user},
+		#{board_category},
+		'0')
+	</insert>
+
+	<!-- ============================================================================================================= -->
+
+	<!-- 게시물 수정 -->
+	<update id="update" parameterType="com.solfood.dto.BoardVO"> <!-- 데이터를 받아오기 위한 resultType 명시 -->
+		update
+		board
+		set
+		board_title = #{board_title},
+		board_content = #{board_content}
+		where
+		board_num = #{board_num}
+	</update> <!-- 기본키 borad_num -->
+
+	<!-- ============================================================================================================= -->
+
+	<!-- 게시물 삭제 -->
+	<delete id="delete" parameterType="int">
+		delete from
+		board
+		where
+		board_num = #{board_num}
+	</delete>
+
+	<!-- ============================================================================================================= -->
+
+	<!-- 삭제후 재정렬 테스트 -->
+	<delete id="deleteAfter" parameterType="com.solfood.dto.BoardVO">
+		update board
+		set board_num= board_num-1
+		where board_num> #{board_num};
+	</delete>
+
+	<!-- ============================================================================================================= -->
+
+	<!-- 게시물 조회 -->
+	<select id="view" parameterType="int"
+		resultType="com.solfood.dto.BoardVO">
+		select
+		board_num, board_title, board_content, account_user,
+		board_date, board_readcount
+		from board
+		where
+		board_num = #{board_num}
+	</select>
+
+	<!-- ============================================================================================================= -->
+
+
+	<!-- ============================================================================================================= -->
+
+	<!-- 게시물 카테고리 -->
+	<select id="selectByCategory"
+		parameterType="com.solfood.dto.SearchCriteria"
+		resultType="com.solfood.dto.BoardVO">
+		<![CDATA[ 
+		select * 
+		from board 
+		where board_category= #{board_category}
+		 ]]>
+		<include refid="search"></include>
+		<!-- <![CDATA[ order by board_num desc limit #{pageStart}, #{perPageNum} 
+			]]> -->
+	</select>
+
+
+	<!-- 게시물 카테고리 갯수 -->
+	<select id="categoryCount" resultType="int">
+		<![CDATA[
+			select count(board_num)
+			from board
+			where board_category= #{board_category}
+		]]>
+		<include refid="search"></include>
+	</select>
+
+
+
+	<!-- 게시물 카테고리 순서 재정렬 테스트 -->
+	<!-- <select id = "selectByCategory" parameterType="String" resultType="com.solfood.dto.BoardVO"> 
+		select board_num, board_title, board_content, account_user, board_date, board_readcount,board_category, 
+		@rownum := @rownum+1 AS RNUM from board,(SELECT @rownum :=0) AS R where board_category 
+		= #{board_category} </select> -->
+
+	<!-- ============================================================================================================= -->
+
+	<!-- 게시물 목록 -->  <!-- resultType="com.solfood.dto.BoardVO : 데이터를 받아오기위해 -->
+	<select id="list" resultType="com.solfood.dto.BoardVO">
+			 <![CDATA[
+		select
+		board_num, board_title, board_content, account_user, board_date, board_readcount
+		from board
+		where 
+		board_num = #{board_num}
+		order by board_num desc, board_date desc
+		limit #{page}, 10
+	 ]]>
+	</select>
+
+	<!-- ================================================================================================================ -->
+	<!-- 게시물목록 넘버 테스트 SELECT @ROWNUM := @ROWNUM + 1 AS ROWNUM, A.* FROM (SELECT 
+		* FROM board WHERE board_category = 'notice') A, (SELECT @ROWNUM := 0 ) B 
+		ORDER BY ROWNUM DESC; -->
+	<!-- 게시물목록 넘버 테스트 2 select board_num, board_title, board_content, account_user, 
+		board_date, board_readcount from board order by board_num desc, board_date 
+		desc -->
+	<!-- ============================================================================================================= -->
+
+	<!-- 조회수 업데이트 -->
+	<update id="updateBoard_readcount">
+		update board
+		set board_readcount = board_readcount + 1
+		where board_num =#{board_num}
+	</update>
+
+	<!-- ============================================================================================================= -->
+
+	<!-- 삭제후 순서정렬 테스트 -->
+	<!-- <delete id="deleteAfter" parameterType="int"> ALTER TABLE board AUTO_INCREMENT=1 
+		SET @COUNT = 0 UPDATE board SET board.board_num = @COUNT:=@COUNT+1 </delete> -->
+
+	<!-- test2 -->
+	<!-- <delete id ="deleteAfter" parameterType="int" > UPDATE board SET board.board_num 
+		= @COUNT:=@COUNT+1 where board_num =#{board_num} </delete> -->
+
+	<!-- ============================================================================================================= -->
+
+	<!-- 페이징 -->
+	<select id="listPage" resultType="com.solfood.dto.BoardVO"> <!-- 페이징 처리된 목록 페이지 호출 -->
+	 <![CDATA[
+		select
+		board_num, board_title, board_content, account_user, board_date, board_readcount
+		from board
+		where 
+		board_num = #{board_num}
+		order by board_num desc, board_date desc
+		limit #{page}, 10
+	 ]]>
+	</select>
+
+	<!-- ================================================================================================================ -->
+
+	<!-- 게시물 전체 목록 보기 (페이징) -->
+	<!-- <![CDATA[ ]]> sql내부에 연산자가 있을 경우 -->
+	<select id="listCriteria" resultType="com.solfood.dto.BoardVO"> <!-- 각 페이지 번호에 알맞은 데이터호출 -->
+	 <![CDATA[
+		select 
+		board_num, board_title, board_content, account_user, board_date, board_readcount, board_category
+		from 
+		board 
+		where board_num > 0 
+		order by board_num desc, board_date desc
+		limit #{pageStart}, #{perPageNum}
+	 ]]>
+	</select>
+
+	<select id="countPaging" resultType="int"> <!-- 전체 게시글 숫자 파악 -->
+	 <![CDATA[
+		select 
+	  	count(board_num) 
+		from 
+	    board 
+	    where 
+	    board_num > 0 
+	 ]]>
+	</select>
+
+	<!-- 페이징테스트 끝 -->
+	<!-- ============================================================================================================= -->
+	<!-- 검색기능 -->
+	<sql id="search">
+		<if test="searchType != null">
+			<if test="searchType == 't'.toString()">
+				and board_title like CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="searchType == 'c'.toString()">
+				and board_content like CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="searchType == 'w'.toString()">
+				and account_user like CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="searchType == 'tc'.toString()">
+				and ( board_title like CONCAT('%', #{keyword}, '%') OR board_content
+				like
+				CONCAT('%', #{keyword}, '%'))
+			</if>
+			<if test="searchType == 'cw'.toString()">
+				and ( board_content like CONCAT('%', #{keyword}, '%') OR account_user
+				like
+				CONCAT('%', #{keyword}, '%'))
+			</if>
+			<if test="searchType == 'tcw'.toString()">
+				and ( board_title like CONCAT('%', #{keyword}, '%')
+				OR
+				board_content like CONCAT('%', #{keyword}, '%')
+				OR
+				account_user like CONCAT('%', #{keyword}, '%'))
+			</if>
+		</if>
+	</sql>
+	<!-- ============================================================================================================= -->
+	<!-- 게시글 목록 /검색기능 -->
+	<select id="listSearch" resultType="com.solfood.dto.BoardVO">
+		 <![CDATA[  
+			select * 
+			from board 
+			where not board_category in ('manager_notice')
+		 ]]>
+		<include refid="search"></include> <!-- 검색기능을 include시킴 -->
+		
+		<![CDATA[    
+			order by board_num desc 
+			limit #{pageStart}, #{perPageNum}
+		]]>
+	</select>
+
+	<select id="listSearchCount" resultType="int">
+		<![CDATA[  
+		    select count(board_num) 
+			from board 
+			where board_num > 0 
+		]]>
+		<include refid="search"></include> <!-- 검색기능을 include시킴 -->
+	</select>
+	<!-- ============================================================= -->
+	<!-- 매니져 게시판 /검색 -->
+	<select id="listSearch2" resultType="com.solfood.dto.BoardVO">
+		 <![CDATA[  
+			select * 
+			from board 
+			where board_num > 0 
+		 ]]>
+		<include refid="search"></include> <!-- 검색기능을 include시킴 -->
+		
+		<![CDATA[    
+			order by board_num desc 
+			limit #{pageStart}, #{perPageNum}
+		]]>
+	</select>
+
+	<select id="listSearchCount2" resultType="int">
+		<![CDATA[  
+		    select count(board_num) 
+			from board 
+			where board_num > 0 
+		]]>
+		<include refid="search"></include> <!-- 검색기능을 include시킴 -->
+	</select>
+
+
+	<!-- ======================================================================================================== -->
+
+	<!-- <select id="Rnum" resultType=""> 리스트 게시판 넘버 select board_num, board_title, 
+		board_content, account_user, board_date, board_readcount, @rownum := @rownum+1 
+		AS RNUM from board,(SELECT @rownum :=0) AS R where board_num; </select> -->
+
+	<!-- ========================댓글 테스트=========================================================================== -->
+	<select id="commentCount" resultType="int">
+		SELECT
+		COUNT(*)
+		FROM comment
+	</select>
+
+
+	<!-- 원래거 
+	<select id="commentList" parameterType="int" resultType="com.solfood.dto.CommentVO">
+		SELECT co.board_num, co.reply_content, co.account_user, co.reply_num, bo.board_title 
+		FROM comment AS co, board AS bo   
+		WHERE co.BOARD_NUM= bo.BOARD_NUM AND co.board_num = #{board_num};
+	</select>
+	-->
+	
+	<select id="commentList" parameterType="int" resultType="com.solfood.dto.CommentVO">
+		SELECT co.board_num, co.reply_content, co.account_user, co.reply_num, bo.board_title
+		FROM comment AS co, board AS bo   
+		WHERE co.BOARD_NUM= bo.BOARD_NUM AND co.board_num = #{board_num};
+	</select>
+
+	<insert id="commentInsert" parameterType="com.solfood.dto.CommentVO">
+		INSERT INTO
+		comment(
+				board_num, 
+				reply_content, 
+				account_user, 
+				reply_date)
+		VALUES(
+				#{board_num}, 
+				#{reply_content}, 
+				#{account_user}, 
+				now())
+	</insert>
+
+	<update id="commentUpdate"
+		parameterType="com.solfood.dto.CommentVO">
+		UPDATE comment
+		SET
+		reply_content = #{reply_content}
+		WHERE reply_num = #{reply_num}
+	</update>
+
+	<select id="commentUpdateForm" parameterType="int"
+		resultType="com.solfood.dto.CommentVO">
+		SELECT *
+		FROM COMMENT
+		WHERE REPLY_NUM= #{reply_num}
+	</select>
+
+	<delete id="commentDelete"
+		parameterType="com.solfood.dto.CommentVO">
+		DELETE FROM comment WHERE reply_num = #{reply_num}
+	</delete>
+
+
+	<!-- ===============================댓글 테스트끝==================================================================== -->
+	<!-- ===============================매니저보드 테스트==================================================================== -->
+
+
+
+
+	<!-- ======매니저보드작성====================================================================================== -->
+
+	<insert id="managerBoard_write"
+		parameterType="com.solfood.dto.BoardVO">
+	insert into
+		board(
+			board_date,
+			board_title, 
+			board_content, 
+			account_user, 
+			board_category, 
+			board_readcount)
+		values(
+			now(),
+			#{board_title}, 
+			#{board_content}, 
+			#{account_user}, 
+			#{board_category}, 
+			'0') 
+	</insert>
+	<!-- ============매니저보드조회================================================================================================= -->
+
+
+	<select id="managerBoard_view" parameterType="int"
+		resultType="com.solfood.dto.BoardVO">
+		select
+		board_num, board_title, board_content, account_user,
+		board_date, board_readcount
+		from board
+		where
+		board_num = #{board_num}
+	</select>
+
+	<!-- ================매니저보드수정============================================================================================= -->
+	<update id="managerBoard_update"
+		parameterType="com.solfood.dto.BoardVO">
+		update
+		board
+		set
+		board_title = #{board_title},
+		board_content = #{board_content}
+		where
+		board_num = #{board_num}
+	</update>
+<!-- ============================================================================================================= -->	
+	<!-- 게시물 삭제 -->
+	<delete id="managerBoard_delete" parameterType="int">
+		delete from
+		board
+		where
+		board_num = #{board_num}
+	</delete>
+
+	<!-- 삭제후 재정렬 테스트 -->
+	<delete id="managerBoard_deleteAfter" parameterType="com.solfood.dto.BoardVO">
+		update board
+		set board_num= board_num-1
+		where board_num> #{board_num};
+	</delete>
+	<!-- ============================================================================================================= -->
+	<!-- 매니져 게시판 카테고리 -->
+	<select id="managerBoard_category"
+		parameterType="com.solfood.dto.SearchCriteria"
+		resultType="com.solfood.dto.BoardVO">
+		<![CDATA[ 
+		select * 
+		from board 
+		where board_category= #{board_category}
+		 ]]>
+		<include refid="search"></include>
+		<!-- <![CDATA[ order by board_num desc limit #{pageStart}, #{perPageNum} 
+			]]> -->
+	</select>
+
+
+	<!-- 매니져 게시판 카테고리 갯수 -->
+	<select id="managerBoard_categoryCount" resultType="int">
+		<![CDATA[
+			select count(board_num)
+			from board
+			where board_category= #{board_category}
+		]]>
+		<include refid="search"></include>
+	</select>
+
+</mapper>

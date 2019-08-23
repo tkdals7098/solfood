@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+	<mapper namespace="com.solfood.mapper.chartMapper">
+		<!-- 2019년 최다 판매 제품  -->
+		<select id="chart_mostSelllingProducts_201907" resultType="com.solfood.dto.TotalVO">
+			SELECT p.product_id, p.product_name, b.buy_id, b.BUY_DATE, SUM(b.buy_count) AS BUY_COUNT
+			FROM buy b, product p
+			WHERE p.product_id= b.product_id AND b.BUY_DATE LIKE '2019%'
+			GROUP BY p.product_id
+			ORDER BY SUM(b.buy_count) DESC LIMIT 5;
+		</select>
+		
+		<!-- 7월 카테고리별 판매수량  -->
+		<select id="chart_sellingProductsByCategory_201907" resultType="com.solfood.dto.TotalVO">
+			SELECT p.product_id, p.product_category1, p.product_category2, b.buy_id, b.BUY_DATE, SUM(b.buy_count) AS BUY_COUNT
+			FROM buy b, product p 
+			WHERE b.product_id= p.product_id AND b.BUY_DATE LIKE '2019%'
+			GROUP BY p.product_category1
+			ORDER BY SUM(b.buy_count) DESC;
+		</select>
+		
+		<!-- 찜한 상품 -->
+		<select id="chart_mostLikedProducts" resultType="com.solfood.dto.TotalVO">
+			SELECT H.PRODUCT_ID, P.PRODUCT_NAME, COUNT(P.PRODUCT_ID) PRODUCT_COUNT 
+			FROM HEART H, PRODUCT P
+			WHERE P.PRODUCT_ID = H.PRODUCT_ID
+			GROUP BY P.PRODUCT_ID
+			ORDER BY COUNT(P.PRODUCT_ID) DESC LIMIT 5;
+		</select>
+		
+		<!-- 핫키워드 -->
+		<select id="chart_searchKeyword" resultType="com.solfood.dto.TotalVO">
+			select count(search_keyword) keyword_count, search_keyword, search_date 
+			from search
+			group by search_keyword 
+			order by count(search_keyword) DESC LIMIT 5;
+		</select>
+		
+	</mapper>

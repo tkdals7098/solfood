@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+	<mapper namespace="com.solfood.mapper.recipeMapper">
+	<!-- =============================== SELECT ========================================= -->
+		<!-- ID에 해당하는 레시피 정보 모두 추출 -->
+		<select id="selectRecipe" parameterType="int" resultType="com.solfood.dto.TotalVO">
+			SELECT *
+			FROM product p, relaterp rp, recipe r
+			WHERE p.product_id = rp.product_id
+			AND r.recipe_id = rp.recipe_id
+			AND r.recipe_id = #{recipe_id}; 
+		</select>
+	
+		<!-- 레시피 정보 모두 추출 -->
+		<select id="allRecipe" resultType="com.solfood.dto.TotalVO">
+			SELECT * 
+			FROM recipe;
+		</select>
+		
+		<!-- 연관상품 -->
+		<select id="relateProduct" resultType="com.solfood.dto.TotalVO">
+			SELECT *
+			FROM product p, relaterp rp
+			WHERE p.product_id = rp.product_id
+			AND rp.recipe_id = #{recipe_id};
+		</select>
+		
+		<!-- 
+		SELECT * 
+		FROM recipe
+		WHERE recipe_name LIKE #{recipeList.reciepe_keyword}
+		OR recipe_tag LIKE #{recipeList.reciepe_keyword};
+		 -->
+		
+		<select id="getRecipe" resultType="com.solfood.dto.TotalVO" parameterType="int">
+		SELECT * FROM recipe WHERE recipe_id = #{recipe_id}
+		</select>
+		
+	</mapper>
+	
+	
+	
+	
+	

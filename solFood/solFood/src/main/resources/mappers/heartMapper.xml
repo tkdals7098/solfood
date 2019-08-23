@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+	<mapper namespace="com.solfood.mapper.heartMapper">
+	<!-- =============================== SELECT ========================================= -->
+		<!-- heart 테이블 목록 추출 -->
+		<select id="selectHeartForHeartList" parameterType="String" resultType="com.solfood.dto.TotalVO">
+			SELECT P.PRODUCT_ID, P.PRODUCT_NAME, P.PRODUCT_IMAGE, P.PRODUCT_PRICE, H.HEART_NUM, H.ACCOUNT_USER 
+			FROM PRODUCT P, HEART H
+			WHERE P.PRODUCT_ID= H.PRODUCT_ID AND H.ACCOUNT_USER= #{account_user};	
+		</select>
+		
+		<!-- heart 테이블 목록 추출 -->
+		<select id="selectHeartForProductList" resultType="com.solfood.dto.TotalVO">
+			SELECT * FROM HEART;
+		</select>
+	<!-- =============================== INSERT ========================================= -->
+		<!-- heart 누르면 heart 테이블로 상품 들어가게 하기 -->
+		<insert id="insertHeart" parameterType="com.solfood.dto.TotalVO">
+			INSERT INTO HEART (PRODUCT_ID, ACCOUNT_USER) VALUES(#{product_id}, #{account_user})
+		</insert>
+		
+	<!-- =============================== DELETE ========================================= -->
+		<!-- heart 다시 누르면 heart에서 상품 사라지게 하기 -->
+		<delete id="deleteHeart" parameterType="com.solfood.dto.TotalVO">
+			DELETE FROM HEART WHERE PRODUCT_ID= #{product_id} AND ACCOUNT_USER= #{account_user}
+		</delete>
+	</mapper>
+	
+	
+	
+	
+	
+	

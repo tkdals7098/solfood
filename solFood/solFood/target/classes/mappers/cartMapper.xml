@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+	<mapper namespace="com.solfood.mapper.cartMapper">	
+		<!-- =============================== SELECT ========================================= -->		
+		<!-- account_user별로 cart에 있는 상품 보여주기 -->
+		<select id="selectCart" parameterType="String" resultType="com.solfood.dto.TotalVO">
+			SELECT C.CART_DATE, C.CART_COUNT, C.PRODUCT_ID, P.PRODUCT_NAME, P.PRODUCT_COUNT, P.PRODUCT_DISCOUNTRATE, P.PRODUCT_PRICE, P.PRODUCT_IMAGE, C.ACCOUNT_USER 
+			FROM CART C, PRODUCT P
+			WHERE C.PRODUCT_ID= P.PRODUCT_ID 
+				AND ACCOUNT_USER= #{account_user};
+		</select>
+		
+		<!-- cart에 이미 있는 상품인지 검색  -->
+		<select id="selectCart_alreadyInOrNot" parameterType="com.solfood.dto.TotalVO" resultType="int">
+			SELECT COUNT(CART_COUNT)    
+			FROM CART 
+			WHERE PRODUCT_ID= #{product_id} AND ACCOUNT_USER= #{account_user}
+		</select>
+		
+
+		<!-- =============================== INSERT ========================================= -->
+		<!-- cart에 상품 넣기 -->
+		<insert id="insertCart" parameterType="com.solfood.dto.TotalVO">
+			INSERT INTO CART(CART_DATE, CART_COUNT, PRODUCT_ID, ACCOUNT_USER) VALUES(current_date(), #{cart_count}, #{product_id}, #{account_user}) 
+		</insert>
+		
+		
+		<!-- =============================== DELETE ========================================= -->
+		<!-- cart에서 상품 삭제하기 -->
+	 	<delete id="deleteCart" parameterType= "com.solfood.dto.TotalVO">		
+	    	DELETE FROM CART WHERE ACCOUNT_USER= #{account_user} AND PRODUCT_ID= #{product_id} 	    
+	    </delete>
+	    
+	    <!-- cart 클리어하기 -->
+	 	<delete id="clearCart" parameterType= "String">		
+	    	DELETE FROM CART WHERE ACCOUNT_USER= #{account_user} 	    
+	    </delete>
+	    
+	    <!-- =============================== UPDATE ========================================= -->
+	    <!-- cart에서 상품 개수 조정하기 -->
+	    <update id="updateCart" parameterType="com.solfood.dto.TotalVO">
+			UPDATE CART 
+			SET CART_COUNT= #{cart_count}  
+			WHERE ACCOUNT_USER= #{account_user} AND PRODUCT_ID= #{product_id}
+		</update>
+		
+		
+		<!-- cart에 같은 상품 넣으면 수량만 올라가게 조정// cart에서 수량 + 조정하기 -->
+		<update id="updateCart_plusCartCount" parameterType="com.solfood.dto.TotalVO">
+			UPDATE CART 
+			SET CART_COUNT= CART_COUNT+ 1  
+			WHERE ACCOUNT_USER= #{account_user} AND PRODUCT_ID= #{product_id}
+		</update>
+		
+		
+		<!-- cart에서 수량 - 조정하기 -->
+		<update id="updateCart_minusCartCount" parameterType="com.solfood.dto.TotalVO">
+			UPDATE CART
+			SET CART_COUNT= CART_COUNT-1
+			WHERE ACCOUNT_USER= #{account_user} AND PRODUCT_ID= #{product_id}
+		</update>
+	</mapper>
+	
+	
+	
+	
+	
+	

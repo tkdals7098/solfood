@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+	<mapper namespace="com.solfood.mapper.managerMapper">
+	
+		<!--================================ product ===================================-->	
+		<!-- 상품목록 조회 -->
+		<select id="selectProduct" resultType="com.solfood.dto.ProductVO">
+	        SELECT * FROM product
+	    </select>    
+	    
+	    <!-- 상품페이지 -->
+	    <select id="pageProduct" resultType="com.solfood.dto.ProductVO" parameterType="com.solfood.utils.Criteria">
+		    SELECT * 
+			FROM product 
+			ORDER BY product_id DESC
+			LIMIT #{rowStart}, #{rowEnd};
+	    </select>
+	    <select id="countProduct" resultType="int">
+		    <![CDATA[
+	    	SELECT count(product_id)
+	    	FROM product
+	    	WHERE product_id > 0
+		    ]]>
+	    </select>
+	    
+	    <!-- 상품정보 상세페이지 -->
+	    <select id="productDetail" parameterType="int" resultType="com.solfood.dto.ProductVO">
+	    	SELECT * 
+	    	FROM product 
+	    	WHERE product_id = #{product_id}
+	    </select>
+	    
+	    <!-- 상품정보수정 -->
+	    <update id="updateProduct" parameterType="com.solfood.dto.ProductVO">
+	    	UPDATE product 
+	    	SET product_name=#{product_name}, 
+	    		product_category1=#{product_category1}, 
+	    		product_category2=#{product_category2}, 
+	    		product_price=#{product_price}, 
+	    		product_discountrate=#{product_discountrate}, 
+	    		product_count=#{product_count}, 
+	    		product_image=#{product_image}, 
+	    		product_package=#{product_package}, 
+	    		product_ea=#{product_ea}, 
+	    		product_content=#{product_content}, 
+	    		product_date=#{product_date}
+	    	WHERE product_id= #{product_id}
+	    </update> 
+		
+	    <!-- 상품삭제 -->
+	    <delete id="deleteProduct" parameterType="int">
+	    	DELETE FROM product 
+	    	WHERE product_id= #{product_id}
+	    </delete>
+	    
+	    <!-- 상품등록 -->
+	    <insert id="insertProduct" parameterType="com.solfood.dto.ProductVO">
+	    	INSERT INTO product (
+	    		product_id,
+	    		product_name, 
+				product_category1, 
+				product_category2, 
+				product_price, 
+				product_discountrate, 
+				product_count, 
+				product_image, 
+				product_package, 
+				product_ea, 
+				product_content, 
+				product_date) 
+			VALUES (
+				(SELECT IFNULL(MAX(product_id)+1, 1) FROM product p),
+				#{product_name},
+    			#{product_category1},
+    			#{product_category2},
+    			#{product_price},
+    			#{product_discountrate},
+    			#{product_count},
+    			#{product_image},
+    			#{product_package},
+    			#{product_ea},
+    			#{product_content},
+    			#{product_date})
+	    </insert>
+
+		<!--================================ account ===================================-->	
+		<!-- 회원목록 조회 -->
+		<select id="selectMember" resultType="com.solfood.dto.MemberVO">
+	        SELECT * FROM account;
+	    </select> 
+	    
+	    <!-- 회원정보 상세페이지 -->
+		<select id="memberDetail" parameterType="String" resultType="com.solfood.dto.MemberVO">
+			SELECT * 
+			FROM account 
+			WHERE account_user = #{account_user}
+		</select>
+		 
+		<!-- 회원페이지 -->
+		<select id="pageAccount" resultType="com.solfood.dto.MemberVO" parameterType="com.solfood.utils.Criteria">
+			SELECT @rownum := @rownum+1 AS RNUM,
+				account_user, 
+				account_password,
+				account_name,
+				account_date,
+				account_tel,
+				account_address,
+				account_grade,
+				account_age,
+				account_gender,
+				account_email
+			FROM (SELECT @rownum :=0) AS R, account
+			ORDER BY RNUM DESC
+			LIMIT #{rowStart}, #{rowEnd};
+		</select>
+	  	<select id="countAccount" resultType="int">
+		    <![CDATA[
+	    	SELECT count(account_user)
+	    	FROM account
+		    ]]>
+	    </select>
+		
+	    <!-- 회원정보 수정 -->
+		<update id="updateMember" parameterType="com.solfood.dto.MemberVO">
+			UPDATE account
+			SET account_name = #{account_name},
+				account_grade = #{account_grade},
+				account_password = #{account_password},
+				account_tel = #{account_tel},
+				account_address = #{account_address},
+				account_email = #{account_email}
+				
+			WHERE account_user = #{account_user}
+		</update>
+		
+		<!-- 회원정보 삭제 -->
+		<delete id="deleteMember" parameterType="String">
+			DELETE FROM account
+			WHERE account_user = #{account_user}
+		</delete>
+		
+	    <!--================================ buy ===================================-->		
+		<select id="selectBuy" resultType="com.solfood.dto.BuyVO">
+			SELECT *
+	        FROM buy b, account a
+	        WHERE b.account_user = a.account_user
+	        
+	        <!-- 
+	        SELECT *
+	        FROM buy b, account a
+	        WHERE b.account_user = a.account_user
+	        ORDER BY b.buy_delivery DESC 
+	        -->
+	    </select> 
+	    
+	    <select id="buyDetail" resultType="com.solfood.dto.BuyVO">
+	    	SELECT *
+	    	FROM buy b, account a, product p
+	    	WHERE b.account_user = a.account_user
+	    	AND b.product_id = p.product_id
+	    	AND buy_id = #{buy_id}
+	    </select>
+	    
+	    <update id="updateBuyDetail" parameterType="com.solfood.dto.BuyVO">
+	    	UPDATE buy 
+	    	SET buy_delivery = #{buy_delivery}
+	    	WHERE buy_id = #{buy_id}
+	    </update>
+	    
+	    <!--================================ board ===================================-->	
+		<select id="selectBoard" resultType="com.solfood.dto.BoardVO">
+	        SELECT * FROM BOARD
+	    </select>
+	    
+	    
+	    <!-- =============================== recipe ========================================= -->
+		<!-- recipe list 보기 -->
+		<select id="selectRecipe" resultType="com.solfood.dto.TotalVO">
+			SELECT *
+			FROM RECIPE R 
+		</select>
+	    
+	    <!-- recipe 특정 레시피 보기 
+		<select id="selectRecipeDetail" parameterType="int" resultType="com.solfood.dto.TotalVO">
+			SELECT * 
+			FROM RECIPE R
+			WHERE RECIPE_ID= #{recipe_id}
+		</select>
+		-->	
+	
+		
+		 <!-- 영민수정 recipe 특정 레시피 보기  -->
+	    <select id="selectRecipeDetail" resultType="com.solfood.dto.TotalVO" parameterType="int">
+	    	SELECT R.NO, R.RECIPE_ID, R.PRODUCT_ID, P.PRODUCT_IMAGE, P.PRODUCT_NAME, RC.RECIPE_IMAGE, RC.RECIPE_CONTENT, RC.RECIPE_NAME, RC.RECIPE_KEYWORD, RC.RECIPE_TAG, RC.RECIPE_DATE  
+			FROM RELATERP R, RECIPE RC, PRODUCT P  
+			WHERE R.RECIPE_ID= RC.RECIPE_ID AND P.PRODUCT_ID= R.PRODUCT_ID AND R.RECIPE_ID= #{recipe_id};
+	    </select>
+	    
+	    
+	    <!-- recipe 등록하기 -->
+	    <update id="insertRecipe" parameterType="com.solfood.dto.TotalVO" useGeneratedKeys="true" keyProperty="recipe_id">
+	    	INSERT INTO RECIPE (RECIPE_IMAGE, 
+						    	RECIPE_CONTENT, 
+						    	RECIPE_NAME, 
+						    	RECIPE_KEYWORD, 
+						    	RECIPE_DATE) 
+	    	VALUES (#{recipe_image}, 
+			    	#{recipe_content}, 
+			    	#{recipe_name}, 
+			    	#{recipe_keyword}, 
+			    	#{recipe_date}) 
+	    </update>
+	   
+	    
+	    <!-- 연관성 조회하기 -->
+	    <select id="readRelate" resultType="com.solfood.dto.TotalVO">
+	    	SELECT *
+	    	FROM relateRP
+	    	WHERE recipe_id = #{recipe_id}
+	    </select>
+	    
+	    <!-- 연관성 테이블에 레시피와 제품번호 입력하기 -->
+	    <update id="insertRelateRP" parameterType="com.solfood.dto.TotalVO">
+			INSERT INTO relateRP (recipe_id,
+					    		  product_id)
+			VALUES (#{recipe_id},
+					#{product_id})
+	    </update>
+	    
+	    <!-- recipe 수정하기 -->
+	    <update id="updateRecipe" parameterType="com.solfood.dto.TotalVO">
+	    	UPDATE RECIPE 
+	    	SET RECIPE_IMAGE	= #{recipe_image}, 
+		    	RECIPE_CONTENT	= #{recipe_content}, 
+		    	RECIPE_NAME		= #{recipe_name}, 
+		    	RECIPE_KEYWORD 	= #{recipe_keyword}, 
+		    	RECIPE_DATE		= #{recipe_date} 
+	    	
+			WHERE RECIPE_ID= #{recipe_id} 	    	
+	    </update>
+	    
+	    <!-- recipe 삭제하기 -->
+	    <delete id="deleteRecipe" parameterType="int">
+	    	DELETE FROM RECIPE 
+	    	WHERE RECIPE_ID= #{recipe_id} 
+	    </delete>
+	    
+	</mapper>
+
+	
+	
