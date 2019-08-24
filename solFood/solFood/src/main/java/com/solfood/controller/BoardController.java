@@ -207,6 +207,7 @@ public class BoardController {
 		return "redirect:/board/listPage";
 	}
 
+
 	 */
 	// 댓글 작성
 	@RequestMapping(value="/commentInsert", method = {RequestMethod.GET, RequestMethod.POST})
